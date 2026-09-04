@@ -15,9 +15,9 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 });
 
-Route::get('/recipes/{recipe}', [RecipeController::class, 'show'])->name('recipes.show');
-
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::resource('recipes', RecipeController::class)->except(['show']);
 });
+
+Route::get('/recipes/{recipe}', [RecipeController::class, 'show'])->name('recipes.show');

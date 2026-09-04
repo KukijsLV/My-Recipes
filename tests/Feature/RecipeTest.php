@@ -15,6 +15,8 @@ class RecipeTest extends TestCase
     {
         $user = User::factory()->create();
 
+        $this->actingAs($user)->get(route('recipes.create'))->assertOk();
+
         $response = $this->actingAs($user)->post(route('recipes.store'), [
             'title' => 'Zupa',
             'description' => 'Silta zupa.',
