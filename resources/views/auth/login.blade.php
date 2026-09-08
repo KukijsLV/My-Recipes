@@ -3,7 +3,7 @@
 @section('content')
 <div>
     <h1>Ienākt</h1>
-    <p>Pārvaldi savas receptes vienuviet.</p>
+    <p>Tavas receptes.</p>
     <form method="POST" action="{{ route('login.store') }}">
         @csrf
         <div>

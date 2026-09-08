@@ -13,9 +13,11 @@
 body {
     margin: 0;
     padding: 20px;
+    background-color: #858a4a;
     font-family: Arial, sans-serif;
     line-height: 1.5;
-    color: #222;
+    color: black;
+   
 }
 
 main,
@@ -35,7 +37,7 @@ nav form {
 }
 
 a {
-    color: #06c;
+    color: black;
 }
 
 form {
