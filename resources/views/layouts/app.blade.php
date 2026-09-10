@@ -9,25 +9,29 @@
     @endif
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="{{ auth()->check() ? route('recipes.index') : url('/') }}">My Recipes</a>
-            <div>
-                @auth
-                    <span>{{ auth()->user()->name }}</span>
-                    <a href="{{ route('recipes.create') }}">Jauna recepte</a>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit">Iziet</button>
-                    </form>
-                @else
-                    <a href="{{ route('login') }}">Ienākt</a>
-                    <a href="{{ route('register') }}">Reģistrēties</a>
-                @endauth
-            </div>
-        </nav>
-    </header>
-    <main>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <nav class="side-nav">
+                <a class="brand" href="{{ auth()->check() ? route('recipes.index') : url('/') }}">My Recipes</a>
+
+                <div class="nav-actions">
+                    @auth
+                        <span class="user-name">{{ auth()->user()->name }}</span>
+                        <a href="{{ route('recipes.index') }}">Receptes</a>
+                        <a href="{{ route('recipes.create') }}">Jauna recepte</a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit">Iziet</button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}">Ienākt</a>
+                        <a href="{{ route('register') }}">Reģistrēties</a>
+                    @endauth
+                </div>
+            </nav>
+        </aside>
+
+        <main class="page-shell">
         @if (session('status'))
             <div>{{ session('status') }}</div>
         @endif
@@ -40,7 +44,8 @@
                 </ul>
             </div>
         @endif
-        @yield('content')
-    </main>
+            @yield('content')
+        </main>
+    </div>
 </body>
 </html>
