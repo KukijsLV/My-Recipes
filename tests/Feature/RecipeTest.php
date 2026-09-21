@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Recipe;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class RecipeTest extends TestCase
@@ -63,6 +65,31 @@ class RecipeTest extends TestCase
             ->assertOk()
             ->assertSee($matchingRecipe->title)
             ->assertDontSee('Kartupeļu biezeni');
+    }
+
+    public function test_authenticated_user_can_update_their_profile(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Vecais vārds',
+            'email' => 'vecais@example.com',
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('profile.update'), [
+                'name' => 'Jauns vārds',
+                'email' => 'jauns@example.com',
+                'password' => 'new-password-123',
+                'password_confirmation' => 'new-password-123',
+                'profile_image' => UploadedFile::fake()->image('profile.jpg'),
+            ])
+            ->assertRedirect(route('profile'));
+
+        $user->refresh();
+
+        $this->assertSame('Jauns vārds', $user->name);
+        $this->assertSame('jauns@example.com', $user->email);
+        $this->assertTrue(Hash::check('new-password-123', $user->password));
+        $this->assertNotNull($user->profile_image);
     }
 
     public function test_user_cannot_update_or_delete_another_users_recipe(): void

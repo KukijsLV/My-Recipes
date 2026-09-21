@@ -16,7 +16,7 @@
 
                 <div class="nav-actions">
                     @auth
-                        <span class="user-name">{{ auth()->user()->name }}</span>
+                        <a href="{{ route('profile') }}" class="user-name">{{ auth()->user()->name }}</a>
                         <a href="{{ route('recipes.index') }}">Receptes</a>
                         <a href="{{ route('recipes.create') }}">Jauna recepte</a>
                         <form method="POST" action="{{ route('logout') }}">
