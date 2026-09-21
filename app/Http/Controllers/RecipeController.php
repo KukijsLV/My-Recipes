@@ -15,9 +15,21 @@ class RecipeController extends Controller
      */
     public function index(Request $request): View
     {
-        $recipes = $request->user()->recipes()->latest()->get();
+        $search = trim((string) $request->query('search', ''));
 
-        return view('recipes.index', compact('recipes'));
+        $recipes = $request->user()
+            ->recipes()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('ingredients', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->get();
+
+        return view('recipes.index', compact('recipes', 'search'));
     }
 
     /**

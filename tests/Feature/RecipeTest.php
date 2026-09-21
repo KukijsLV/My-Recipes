@@ -44,6 +44,27 @@ class RecipeTest extends TestCase
         $this->get(route('recipes.show', $recipe))->assertOk()->assertSee($recipe->title);
     }
 
+    public function test_authenticated_user_can_search_recipes_by_keyword(): void
+    {
+        $user = User::factory()->create();
+        $matchingRecipe = Recipe::factory()->create([
+            'user_id' => $user->id,
+            'title' => 'Tomātu zupa',
+            'ingredients' => 'tomāti, sīpoli',
+        ]);
+        Recipe::factory()->create([
+            'user_id' => $user->id,
+            'title' => 'Kartupeļu biezeni',
+            'ingredients' => 'kartupeļi, piens',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('recipes.index', ['search' => 'tomāti']))
+            ->assertOk()
+            ->assertSee($matchingRecipe->title)
+            ->assertDontSee('Kartupeļu biezeni');
+    }
+
     public function test_user_cannot_update_or_delete_another_users_recipe(): void
     {
         $recipe = Recipe::factory()->create();

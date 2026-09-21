@@ -8,11 +8,21 @@
     </div>
     <a class="button" href="{{ route('recipes.create') }}">+ Pievienot</a>
 </div>
+
+<form class="recipe-search" method="GET" action="{{ route('recipes.index') }}">
+    <label class="sr-only" for="recipe-search">Meklēt receptes</label>
+    <input id="recipe-search" name="search" type="search" value="{{ old('search', $search ?? '') }}" placeholder="Meklēt recepti, sastāvdaļas vai aprakstu...">
+    <button class="button secondary" type="submit">Meklēt</button>
+    @if ($search !== '')
+        <a class="search-clear" href="{{ route('recipes.index') }}">Notīrīt</a>
+    @endif
+</form>
+
 @if ($recipes->isEmpty())
     <div class="empty-state">
-        <h2>Vēl nav nevienas receptes</h2>
-        <p>Pirmā recepte sākas ar vienu labu ideju.</p>
-        <a class="button" href="{{ route('recipes.create') }}">Izveidot recepti</a>
+        <h2>{{ $search !== '' ? 'Nav atrasta neviena recepte' : 'Vēl nav nevienas receptes' }}</h2>
+        <p>{{ $search !== '' ? 'Mēģiniet meklēt citu nosaukumu vai sastāvdaļas.' : 'Pirmā recepte sākas ar vienu labu ideju.' }}</p>
+        <a class="button" href="{{ route('recipes.create') }}">{{ $search !== '' ? 'Izveidot jaunu recepti' : 'Izveidot recepti' }}</a>
     </div>
 @else
     <div class="recipe-list">
