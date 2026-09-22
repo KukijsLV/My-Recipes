@@ -67,6 +67,19 @@ class RecipeTest extends TestCase
             ->assertDontSee('Kartupeļu biezeni');
     }
 
+    public function test_recipe_ingredients_are_rendered_as_a_numbered_list(): void
+    {
+        $recipe = Recipe::factory()->create([
+            'title' => 'Tomātu zupa',
+            'ingredients' => "tomāti\nsīpoli\nūdens",
+            'visibility' => 'public',
+        ]);
+
+        $this->get(route('recipes.show', $recipe))
+            ->assertOk()
+            ->assertSeeInOrder(['<ol>', '<li>tomāti</li>', '<li>sīpoli</li>', '<li>ūdens</li>'], false);
+    }
+
     public function test_authenticated_user_can_update_their_profile(): void
     {
         $user = User::factory()->create([

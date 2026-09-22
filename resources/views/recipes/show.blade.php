@@ -20,7 +20,18 @@
     <div class="recipe-show-grid">
         <section class="recipe-show-section">
             <h2>Sastāvdaļas</h2>
-            <div>{{ $recipe->ingredients }}</div>
+            @php
+                $ingredientLines = array_values(array_filter(array_map('trim', preg_split('/\R+/', trim((string) $recipe->ingredients))), fn ($ingredient) => $ingredient !== ''));
+            @endphp
+            @if ($ingredientLines)
+                <ol>
+                    @foreach ($ingredientLines as $ingredient)
+                        <li>{{ $ingredient }}</li>
+                    @endforeach
+                </ol>
+            @else
+                <p>Nav sastāvdaļu.</p>
+            @endif
         </section>
         <section class="recipe-show-section">
             <h2>Pagatavošana</h2>
