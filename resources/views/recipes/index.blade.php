@@ -3,10 +3,12 @@
 @section('content')
 <div class="recipes-page">
     <div class="recipes-heading">
-        <p>Mana virtuve</p>
-        <h1>Manas receptes</h1>
+        <p>Brīvpieejamās receptes</p>
+        <h1>Visas receptes</h1>
     </div>
-    <a class="button" href="{{ route('recipes.create') }}">+ Pievienot</a>
+    @auth
+        <a class="button" href="{{ route('recipes.create') }}">+ Pievienot</a>
+    @endauth
 </div>
 
 <form class="recipe-search" method="GET" action="{{ route('recipes.index') }}">
@@ -22,20 +24,27 @@
     <div class="empty-state">
         <h2>{{ $search !== '' ? 'Nav atrasta neviena recepte' : 'Vēl nav nevienas receptes' }}</h2>
         <p>{{ $search !== '' ? 'Mēģiniet meklēt citu nosaukumu vai sastāvdaļas.' : 'Pirmā recepte sākas ar vienu labu ideju.' }}</p>
-        <a class="button" href="{{ route('recipes.create') }}">{{ $search !== '' ? 'Izveidot jaunu recepti' : 'Izveidot recepti' }}</a>
+        @auth
+            <a class="button" href="{{ route('recipes.create') }}">{{ $search !== '' ? 'Izveidot jaunu recepti' : 'Izveidot recepti' }}</a>
+        @endauth
     </div>
 @else
     <div class="recipe-list">
         @foreach ($recipes as $recipe)
-            <article class="recipe-card">
+            <article class="recipe-card" style="border-left: 6px solid {{ $recipe->color ?? '#5f7f6d' }};">
                 <div class="recipe-card-heading">
                     <h2><a href="{{ route('recipes.show', $recipe) }}">{{ $recipe->title }}</a></h2>
-                    <span class="visibility">{{ $recipe->visibility === 'public' ? 'Publiska' : 'Privāta' }}</span>
+                    <span class="visibility" style="background: {{ $recipe->color ?? '#5f7f6d' }}22; color: {{ $recipe->color ?? '#2a5144' }};">{{ $recipe->visibility === 'public' ? 'Publiska' : 'Privāta' }}</span>
                 </div>
+                <p class="recipe-author">Autors: <a href="{{ route('user.profile', $recipe->user) }}">{{ $recipe->user->name }}</a></p>
                 <p>{{ $recipe->description ?: $recipe->ingredients }}</p>
                 <div class="recipe-actions">
                     <a href="{{ route('recipes.show', $recipe) }}">Apskatīt</a>
-                    <a href="{{ route('recipes.edit', $recipe) }}">Rediģēt</a>
+                    @auth
+                        @if (auth()->id() === $recipe->user_id)
+                            <a href="{{ route('recipes.edit', $recipe) }}">Rediģēt</a>
+                        @endif
+                    @endauth
                 </div>
             </article>
         @endforeach

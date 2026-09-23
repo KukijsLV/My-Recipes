@@ -31,6 +31,24 @@ class RecipeTest extends TestCase
         $this->assertDatabaseHas('recipes', ['user_id' => $user->id, 'title' => 'Zupa']);
     }
 
+    public function test_new_recipe_gets_a_random_color(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post(route('recipes.store'), [
+            'title' => 'Kartupeļu zupa',
+            'description' => 'Garšīga zupa.',
+            'ingredients' => 'Kartupeļi',
+            'instructions' => 'Uzvārīt.',
+            'visibility' => 'public',
+        ]);
+
+        $recipe = Recipe::query()->where('user_id', $user->id)->firstOrFail();
+
+        $this->assertNotNull($recipe->color);
+        $this->assertMatchesRegularExpression('/^#[0-9A-Fa-f]{6}$/', $recipe->color);
+    }
+
     public function test_private_recipe_is_hidden_from_another_user(): void
     {
         $owner = User::factory()->create();
@@ -44,6 +62,50 @@ class RecipeTest extends TestCase
         $recipe = Recipe::factory()->create(['visibility' => 'public']);
 
         $this->get(route('recipes.show', $recipe))->assertOk()->assertSee($recipe->title);
+    }
+
+    public function test_public_recipes_are_visible_on_the_index_for_guests(): void
+    {
+        $author = User::factory()->create(['name' => 'Anna']);
+        $recipe = Recipe::factory()->create([
+            'user_id' => $author->id,
+            'visibility' => 'public',
+            'title' => 'Siera salāti',
+        ]);
+
+        $this->get(route('recipes.index'))
+            ->assertOk()
+            ->assertSee('Siera salāti')
+            ->assertSee('Anna');
+    }
+
+    public function test_recipe_show_page_displays_the_author_name(): void
+    {
+        $author = User::factory()->create(['name' => 'Anna']);
+        $recipe = Recipe::factory()->create([
+            'user_id' => $author->id,
+            'visibility' => 'public',
+        ]);
+
+        $this->get(route('recipes.show', $recipe))
+            ->assertOk()
+            ->assertSee('Anna');
+    }
+
+    public function test_profile_page_lists_users_recipes(): void
+    {
+        $user = User::factory()->create(['name' => 'Līga']);
+        $recipe = Recipe::factory()->create([
+            'user_id' => $user->id,
+            'visibility' => 'public',
+            'title' => 'Miežu zupa',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('profile'))
+            ->assertOk()
+            ->assertSee('Miežu zupa')
+            ->assertSee('Līga');
     }
 
     public function test_authenticated_user_can_search_recipes_by_keyword(): void

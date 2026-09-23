@@ -80,6 +80,9 @@ nav {
 
 .app-shell {
     display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
     gap: 26px;
     max-width: 1320px;
     margin: 0 auto;
@@ -89,6 +92,7 @@ nav {
 .sidebar {
     width: 280px;
     flex-shrink: 0;
+    order: 0;
 }
 
 .side-nav {
@@ -520,6 +524,50 @@ textarea {
 .recipe-card p {
     margin: 10px 0 18px;
     color: var(--muted);
+}
+
+.recipe-author,
+.recipe-author-inline {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.recipe-author a,
+.recipe-author-inline a {
+    color: var(--sage-strong);
+}
+
+.profile-page {
+    display: grid;
+    gap: 24px;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 6px;
+}
+
+.profile-header-image {
+    width: 92px;
+    height: 92px;
+}
+
+.profile-summary {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.profile-heading {
+    margin-bottom: 12px;
+}
+
+.profile-recipe-section {
+    display: grid;
+    gap: 10px;
 }
 
 .visibility {

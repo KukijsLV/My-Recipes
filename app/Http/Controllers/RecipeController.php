@@ -16,9 +16,18 @@ class RecipeController extends Controller
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search', ''));
+        $user = $request->user();
 
-        $recipes = $request->user()
-            ->recipes()
+        $recipes = Recipe::query()
+            ->with('user')
+            ->when($user, function ($query) use ($user) {
+                $query->where(function ($q) use ($user) {
+                    $q->where('visibility', 'public')
+                        ->orWhere('user_id', $user->id);
+                });
+            }, function ($query) {
+                $query->where('visibility', 'public');
+            })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('title', 'like', "%{$search}%")

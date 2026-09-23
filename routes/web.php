@@ -15,11 +15,14 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 });
 
+Route::get('/recipes', [RecipeController::class, 'index'])->name('recipes.index');
+
 Route::middleware('auth')->group(function (): void {
     Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
+    Route::get('/users/{user}', [AuthController::class, 'showUserProfile'])->name('user.profile');
     Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::resource('recipes', RecipeController::class)->except(['show']);
+    Route::resource('recipes', RecipeController::class)->except(['index', 'show']);
 });
 
 Route::get('/recipes/{recipe}', [RecipeController::class, 'show'])->name('recipes.show');

@@ -1,11 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<article class="recipe-show">
+<article class="recipe-show" style="border-left: 6px solid {{ $recipe->color ?? '#5f7f6d' }}; padding-left: 18px;">
     <div class="recipe-show-header">
         <div>
             <p>{{ $recipe->visibility === 'public' ? 'Publiska recepte' : 'Privāta recepte' }}</p>
             <h1>{{ $recipe->title }}</h1>
+            <p class="recipe-author-inline">Autors: <a href="{{ route('user.profile', $recipe->user) }}">{{ $recipe->user->name }}</a></p>
             <p class="recipe-description">{{ $recipe->description }}</p>
         </div>
         @can('update', $recipe)

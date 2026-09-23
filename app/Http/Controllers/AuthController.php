@@ -54,7 +54,20 @@ class AuthController extends Controller
 
     public function showProfile(): View
     {
-        return view('auth.profile', ['user' => Auth::user()]);
+        $user = Auth::user();
+
+        return $this->showUserProfile($user);
+    }
+
+    public function showUserProfile(User $user): View
+    {
+        $recipes = $user->recipes()->with('user')->latest()->get();
+
+        return view('auth.profile', [
+            'user' => $user,
+            'recipes' => $recipes,
+            'isOwnProfile' => Auth::id() === $user->id,
+        ]);
     }
 
     public function updateProfile(Request $request): RedirectResponse
