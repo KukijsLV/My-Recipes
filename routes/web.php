@@ -21,6 +21,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
     Route::get('/users/{user}', [AuthController::class, 'showUserProfile'])->name('user.profile');
     Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/admin/users/{user}/toggle-block', [AuthController::class, 'toggleUserBlock'])->name('admin.users.toggle-block');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::resource('recipes', RecipeController::class)->except(['index', 'show']);
 });

@@ -129,6 +129,66 @@ class RecipeTest extends TestCase
             ->assertDontSee('Kartupeļu biezeni');
     }
 
+    public function test_authenticated_user_can_sort_recipes_by_newest_and_oldest(): void
+    {
+        $user = User::factory()->create();
+
+        $newestRecipe = Recipe::factory()->create([
+            'user_id' => $user->id,
+            'title' => 'Jaunākā recepte',
+            'created_at' => now()->subDay(),
+        ]);
+        $oldestRecipe = Recipe::factory()->create([
+            'user_id' => $user->id,
+            'title' => 'Vecākā recepte',
+            'created_at' => now()->subDays(3),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('recipes.index', ['sort' => 'newest']))
+            ->assertOk()
+            ->assertSeeInOrder([$newestRecipe->title, $oldestRecipe->title]);
+
+        $this->actingAs($user)
+            ->get(route('recipes.index', ['sort' => 'oldest']))
+            ->assertOk()
+            ->assertSeeInOrder([$oldestRecipe->title, $newestRecipe->title]);
+    }
+
+    public function test_admin_user_can_update_any_recipe_and_block_other_users(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true, 'email' => 'admin@recipes.test']);
+        $user = User::factory()->create(['name' => 'Normāls lietotājs']);
+        $recipe = Recipe::factory()->create([
+            'user_id' => $user->id,
+            'title' => 'Sākotnējais nosaukums',
+            'visibility' => 'public',
+        ]);
+
+        $this->actingAs($admin)
+            ->put(route('recipes.update', $recipe), [
+                'title' => 'Admina labots nosaukums',
+                'description' => 'Jauns apraksts.',
+                'ingredients' => 'tomāti',
+                'instructions' => 'Uzvārīt.',
+                'visibility' => 'public',
+            ])
+            ->assertRedirect(route('recipes.show', $recipe));
+
+        $this->assertSame('Admina labots nosaukums', $recipe->fresh()->title);
+
+        $this->actingAs($admin)
+            ->post(route('admin.users.toggle-block', $user))
+            ->assertRedirect();
+
+        $this->assertTrue($user->fresh()->is_blocked);
+
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertSessionHasErrors(['email']);
+    }
+
     public function test_recipe_ingredients_are_rendered_as_a_numbered_list(): void
     {
         $recipe = Recipe::factory()->create([

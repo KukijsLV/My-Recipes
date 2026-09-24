@@ -264,9 +264,9 @@ textarea {
 .form-eyebrow {
     margin: 0 0 8px;
     color: var(--sage);
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0.16em;
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
 }
 
@@ -421,9 +421,9 @@ textarea {
 .recipe-show-header p {
     margin: 0;
     color: var(--sage);
-    font-size: 0.74rem;
-    font-weight: 800;
-    letter-spacing: 0.18em;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
 }
 
@@ -519,6 +519,21 @@ textarea {
 
 .recipe-card h2 a {
     color: #1d312d;
+}
+
+.recipe-card-image-link {
+    display: block;
+    margin: -8px -8px 14px;
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.recipe-card-image {
+    display: block;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 18px;
 }
 
 .recipe-card p {

@@ -16,6 +16,9 @@ class RecipeController extends Controller
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search', ''));
+        $sort = $request->query('sort', 'newest');
+        $allowedSorts = ['newest', 'oldest'];
+        $sort = in_array($sort, $allowedSorts, true) ? $sort : 'newest';
         $user = $request->user();
 
         $recipes = Recipe::query()
@@ -35,10 +38,14 @@ class RecipeController extends Controller
                         ->orWhere('ingredients', 'like', "%{$search}%");
                 });
             })
-            ->latest()
+            ->when($sort === 'oldest', function ($query) {
+                $query->oldest();
+            }, function ($query) {
+                $query->latest();
+            })
             ->get();
 
-        return view('recipes.index', compact('recipes', 'search'));
+        return view('recipes.index', compact('recipes', 'search', 'sort'));
     }
 
     /**

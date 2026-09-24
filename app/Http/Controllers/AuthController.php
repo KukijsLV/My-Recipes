@@ -27,6 +27,16 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Šie piekļuves dati nav pareizi.'])->onlyInput('email');
         }
 
+        $user = Auth::user();
+
+        if ($user && $user->is_blocked) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors(['email' => 'Tavs konts ir bloķēts.'])->onlyInput('email');
+        }
+
         $request->session()->regenerate();
 
         return to_route('recipes.index');
@@ -102,6 +112,21 @@ class AuthController extends Controller
         $user->save();
 
         return to_route('profile')->with('status', 'Profils atjaunināts.');
+    }
+
+    public function toggleUserBlock(Request $request, User $user): RedirectResponse
+    {
+        if (! $request->user()?->is_admin) {
+            abort(403);
+        }
+
+        $user->update([
+            'is_blocked' => ! $user->is_blocked,
+        ]);
+
+        $status = $user->is_blocked ? 'Lietotājs ir bloķēts.' : 'Lietotāja bloķēšana ir noņemta.';
+
+        return back()->with('status', $status);
     }
 
     public function logout(Request $request): RedirectResponse

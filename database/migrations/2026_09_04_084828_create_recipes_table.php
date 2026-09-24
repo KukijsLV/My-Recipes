@@ -19,7 +19,6 @@ return new class extends Migration
             $table->text('ingredients');
             $table->text('instructions');
             $table->string('image')->nullable();
-            $table->string('color')->nullable();
             $table->enum('visibility', ['public', 'private'])->default('private');
             $table->timestamps();
         });

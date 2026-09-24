@@ -15,6 +15,14 @@
             <p class="form-eyebrow">{{ $isOwnProfile ? 'Mans profils' : 'Profils' }}</p>
             <h1>{{ $user->name }}</h1>
             <p class="profile-summary">{{ $recipes->count() }} receptes</p>
+            @if (auth()->check() && auth()->user()->is_admin && ! $isOwnProfile)
+                <form method="POST" action="{{ route('admin.users.toggle-block', $user) }}" style="margin-top: 1rem;">
+                    @csrf
+                    <button type="submit" class="button secondary">
+                        {{ $user->is_blocked ? 'Atbloķēt lietotāju' : 'Bloķēt lietotāju' }}
+                    </button>
+                </form>
+            @endif
         </div>
     </div>
 
