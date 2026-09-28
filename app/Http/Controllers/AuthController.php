@@ -23,6 +23,12 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        if (Auth::check()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()->withErrors(['email' => 'Šie piekļuves dati nav pareizi.'])->onlyInput('email');
         }
