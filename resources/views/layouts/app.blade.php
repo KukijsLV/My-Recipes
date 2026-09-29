@@ -17,6 +17,7 @@
                         <a href="{{ route('profile') }}" class="user-name">{{ auth()->user()->name }}</a>
                         <a href="{{ route('recipes.index') }}">Receptes</a>
                         <a href="{{ route('recipes.create') }}">Jauna recepte</a>
+                        <a href="{{ route('contact') }}">Kontakti</a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit">Iziet</button>
@@ -24,6 +25,7 @@
                     @else
                         <a href="{{ route('login') }}">Ienākt</a>
                         <a href="{{ route('register') }}">Reģistrēties</a>
+                        <a href="{{ route('contact') }}">Kontakti</a>
                     @endauth
                 </div>
             </nav>
