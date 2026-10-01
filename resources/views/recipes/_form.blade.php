@@ -16,8 +16,16 @@
     <textarea id="instructions" name="instructions" rows="6" required>{{ old('instructions', $recipe->instructions ?? '') }}</textarea>
 </div>
 <div class="form-field">
-    <label for="image">Attēla URL (neobligāts)</label>
-    <input id="image" name="image" type="url" value="{{ old('image', $recipe->image ?? '') }}">
+    <label for="image">Uzņemt vai izvēlēties attēlu</label>
+    <input id="image" name="image" type="file" accept="image/*" capture="environment">
+    <small class="form-hint">Telefonā atvērsies aizmugurējā kamera. Maksimālais faila izmērs: 5 MB.</small>
+</div>
+<div class="form-field">
+    <label for="image_url">Vai ievadīt attēla URL</label>
+    <input id="image_url" name="image_url" type="url" value="{{ old('image_url', isset($recipe) && filter_var($recipe->image, FILTER_VALIDATE_URL) ? $recipe->image : '') }}">
+    @if (isset($recipe) && $recipe->image)
+        <img class="recipe-image-preview" src="{{ $recipe->imageUrl }}" alt="{{ $recipe->title }}">
+    @endif
 </div>
 <fieldset class="visibility-field">
     <legend>Redzamība</legend>

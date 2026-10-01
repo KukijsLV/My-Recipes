@@ -1,10 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-<div>
+<div class="auth-page">
+    <p class="form-eyebrow">Tava virtuve sākas šeit</p>
     <h1>Izveidot kontu</h1>
-    <p>Sāc veidot savu recepšu kolekciju.</p>
-    <form method="POST" action="{{ route('register.store') }}">
+    <p class="auth-intro">Saglabā iecienītās receptes vienuviet.</p>
+    <form class="auth-form" method="POST" action="{{ route('register.store') }}">
         @csrf
         <div>
             <label for="name">Vārds</label>

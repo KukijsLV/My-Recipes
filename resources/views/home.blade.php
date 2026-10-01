@@ -5,13 +5,13 @@
     <section class="home-hero">
         <div class="home-copy">
             <p class="form-eyebrow">Mana virtuve</p>
-            <h1>Glabā, sakārto un dalies ar savām receptēm.</h1>
-            <p class="home-subtitle">Izveido individuālu receptu kolekciju, atrodi gatavotus ēdienus ātri un turpini ēst ar prieku.</p>
+            <h1>Labas receptes pelnījušas savu vietu.</h1>
+            <p class="home-subtitle">Saglabā ģimenes klasiku, atrodi ko jaunu un dalies ar ēdieniem, pie kuriem gribas atgriezties.</p>
 
             <div class="home-actions">
                 @guest
-                    <a class="button" href="{{ route('register') }}">Sākt tūlīt</a>
-                    <a class="button secondary" href="{{ route('login') }}">Ienākt</a>
+                    <a class="button" href="{{ route('recipes.index') }}">Apskatīt receptes</a>
+                    <a class="button secondary" href="{{ route('register') }}">Izveidot kontu</a>
                 @else
                     <a class="button" href="{{ route('recipes.index') }}">Manas receptes</a>
                     <a class="button secondary" href="{{ route('recipes.create') }}">Pievienot recepti</a>
@@ -19,20 +19,10 @@
             </div>
         </div>
 
-        <div class="home-panel">
-            <div class="mini-card">
-                <span>Populārākās</span>
-                <strong>24 receptes</strong>
-            </div>
-            <div class="mini-card accent">
-                <span>Šodienas plāns</span>
-                <strong>3 receptes</strong>
-            </div>
-            <div class="mini-card soft">
-                <span>Vietējie favorīti</span>
-                <strong>8 izlasīti</strong>
-            </div>
-        </div>
+        <figure class="home-visual">
+            <img src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&amp;fit=crop&amp;w=1400&amp;q=85" alt="Svaigi dārzeņi un maltītes sastāvdaļas uz galda">
+            <figcaption>Gatavo, saglabā, nodod tālāk.</figcaption>
+        </figure>
     </section>
 </div>
 @endsection

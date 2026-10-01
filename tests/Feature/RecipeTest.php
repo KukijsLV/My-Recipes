@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class RecipeTest extends TestCase
@@ -17,7 +18,10 @@ class RecipeTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)->get(route('recipes.create'))->assertOk();
+        $this->actingAs($user)
+            ->get(route('recipes.create'))
+            ->assertOk()
+            ->assertSee('accept="image/*" capture="environment"', false);
 
         $response = $this->actingAs($user)->post(route('recipes.store'), [
             'title' => 'Zupa',
@@ -49,6 +53,28 @@ class RecipeTest extends TestCase
         $this->assertMatchesRegularExpression('/^#[0-9A-Fa-f]{6}$/', $recipe->color);
     }
 
+    public function test_authenticated_user_can_upload_a_recipe_photo(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post(route('recipes.store'), [
+                'title' => 'Ābolu pīrāgs',
+                'ingredients' => 'Āboli',
+                'instructions' => 'Izcept.',
+                'visibility' => 'public',
+                'image' => UploadedFile::fake()->image('apple-pie.jpg'),
+            ])
+            ->assertRedirect(route('recipes.index'));
+
+        $recipe = Recipe::query()->where('user_id', $user->id)->firstOrFail();
+
+        $this->assertNotNull($recipe->image);
+        Storage::disk('public')->assertExists($recipe->image);
+        $this->assertStringContainsString('/storage/recipes/', $recipe->imageUrl);
+    }
+
     public function test_private_recipe_is_hidden_from_another_user(): void
     {
         $owner = User::factory()->create();
@@ -71,11 +97,13 @@ class RecipeTest extends TestCase
             'user_id' => $author->id,
             'visibility' => 'public',
             'title' => 'Siera salāti',
+            'image' => null,
         ]);
 
         $this->get(route('recipes.index'))
             ->assertOk()
             ->assertSee('Siera salāti')
+            ->assertSee('recipe-card no-image', false)
             ->assertSee('Anna');
     }
 

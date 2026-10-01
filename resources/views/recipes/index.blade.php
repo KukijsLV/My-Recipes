@@ -43,10 +43,10 @@
 @else
     <div class="recipe-list">
         @foreach ($recipes as $recipe)
-            <article class="recipe-card" style="--recipe-accent: {{ $recipe->color ?? '#5f7f6d' }};">
+            <article class="recipe-card {{ $recipe->image ? 'has-image' : 'no-image' }}" style="--recipe-accent: {{ $recipe->color ?? '#5f7f6d' }};">
                 @if ($recipe->image)
                     <a href="{{ route('recipes.show', $recipe) }}" class="recipe-card-image-link">
-                        <img src="{{ $recipe->image }}" alt="{{ $recipe->title }}" class="recipe-card-image">
+                        <img src="{{ $recipe->imageUrl }}" alt="{{ $recipe->title }}" class="recipe-card-image">
                     </a>
                 @endif
 
@@ -60,7 +60,7 @@
                     <p class="recipe-card-text">{{ $recipe->description ?: $recipe->ingredients }}</p>
 
                     <div class="recipe-card-footer">
-                        <span class="recipe-card-tag">{{ $recipe->visibility === 'public' ? 'Publiska' : 'Privāta' }}</span>
+                        <span class="recipe-card-tag">{{ $recipe->created_at?->format('d.m.Y') }}</span>
                         <div class="recipe-actions">
                             <a href="{{ route('recipes.show', $recipe) }}">Apskatīt</a>
                             @auth

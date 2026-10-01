@@ -10,7 +10,7 @@
     <div class="app-shell">
         <aside class="sidebar">
             <nav class="side-nav">
-                <a class="brand" href="{{ auth()->check() ? route('recipes.index') : url('/') }}">My Recipes</a>
+                <a class="brand" href="{{ route('recipes.index') }}">My Recipes</a>
 
                 <div class="nav-actions">
                     @auth
@@ -23,6 +23,7 @@
                             <button type="submit">Iziet</button>
                         </form>
                     @else
+                        <a href="{{ route('recipes.index') }}">Receptes</a>
                         <a href="{{ route('login') }}">Ienākt</a>
                         <a href="{{ route('register') }}">Reģistrēties</a>
                         <a href="{{ route('contact') }}">Kontakti</a>
@@ -33,10 +34,10 @@
 
         <main class="page-shell">
         @if (session('status'))
-            <div>{{ session('status') }}</div>
+            <div class="flash-message" role="status" aria-live="polite">{{ session('status') }}</div>
         @endif
         @if ($errors->any())
-            <div>
+            <div class="validation-errors" role="alert">
                 <ul>
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>

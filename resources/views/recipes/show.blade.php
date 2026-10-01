@@ -16,7 +16,7 @@
         @endcan
     </div>
     @if ($recipe->image)
-        <img src="{{ $recipe->image }}" alt="{{ $recipe->title }}">
+        <img src="{{ $recipe->imageUrl }}" alt="{{ $recipe->title }}">
     @endif
     <div class="recipe-show-grid">
         <section class="recipe-show-section">

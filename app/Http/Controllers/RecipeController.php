@@ -6,6 +6,7 @@ use App\Models\Recipe;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class RecipeController extends Controller
@@ -66,9 +67,15 @@ class RecipeController extends Controller
             'description' => ['nullable', 'string'],
             'ingredients' => ['required', 'string'],
             'instructions' => ['required', 'string'],
-            'image' => ['nullable', 'url', 'max:2048'],
+            'image' => ['nullable', 'image', 'max:5120'],
+            'image_url' => ['nullable', 'url', 'max:2048'],
             'visibility' => ['required', 'in:public,private'],
         ]);
+
+        $validated['image'] = $request->hasFile('image')
+            ? $request->file('image')->store('recipes', 'public')
+            : ($validated['image_url'] ?? null);
+        unset($validated['image_url']);
 
         $request->user()->recipes()->create($validated);
 
@@ -107,10 +114,20 @@ class RecipeController extends Controller
             'description' => ['nullable', 'string'],
             'ingredients' => ['required', 'string'],
             'instructions' => ['required', 'string'],
-            'image' => ['nullable', 'url', 'max:2048'],
+            'image' => ['nullable', 'image', 'max:5120'],
+            'image_url' => ['nullable', 'url', 'max:2048'],
             'visibility' => ['required', 'in:public,private'],
         ]);
 
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('recipes', 'public');
+        } elseif ($request->filled('image_url')) {
+            $validated['image'] = $validated['image_url'];
+        } else {
+            unset($validated['image']);
+        }
+
+        unset($validated['image_url']);
         $recipe->update($validated);
 
         return to_route('recipes.show', $recipe)->with('status', 'Recepte atjaunināta.');

@@ -1,10 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-<div>
+<div class="auth-page">
+    <p class="form-eyebrow">Prieks tevi atkal redzēt</p>
     <h1>Ienākt</h1>
-    <p>Tavas receptes.</p>
-    <form method="POST" action="{{ route('login.store') }}">
+    <p class="auth-intro">Turpini papildināt savu recepšu kolekciju.</p>
+    <form class="auth-form" method="POST" action="{{ route('login.store') }}">
         @csrf
         <div>
             <label for="email">E-pasts</label>
