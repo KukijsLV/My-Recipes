@@ -58,6 +58,7 @@
 
                     <p class="recipe-author">Autors: <a href="{{ route('user.profile', $recipe->user) }}">{{ $recipe->user->name }}</a></p>
                     <p class="recipe-card-text">{{ $recipe->description ?: $recipe->ingredients }}</p>
+                    @include('recipes._rating-summary', ['recipe' => $recipe])
 
                     <div class="recipe-card-footer">
                         <span class="recipe-card-tag">{{ $recipe->created_at?->format('d.m.Y') }}</span>

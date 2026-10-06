@@ -429,6 +429,89 @@ select:focus {
     -webkit-line-clamp: 3;
 }
 
+.recipe-rating-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.recipe-rating-stars {
+    color: #cbd3cc;
+    font-size: 1.2rem;
+    letter-spacing: 0.08em;
+    line-height: 1;
+}
+
+.recipe-rating-stars .is-filled {
+    color: #e2a323;
+}
+
+.recipe-rating-form {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: fit-content;
+    padding: 18px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--surface);
+}
+
+.recipe-rating-form fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.recipe-rating-form legend {
+    margin-bottom: 6px;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.recipe-rating-options {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 2px;
+}
+
+.recipe-rating-options input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.recipe-rating-options label {
+    color: #cbd3cc;
+    cursor: pointer;
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.recipe-rating-options input:checked + label,
+.recipe-rating-options input:checked ~ input + label,
+.recipe-rating-options label:hover,
+.recipe-rating-options label:hover ~ input + label {
+    color: #e2a323;
+}
+
+.recipe-rating-options:focus-within {
+    outline: 3px solid rgba(228, 86, 59, 0.4);
+    outline-offset: 3px;
+}
+
+.recipe-rating-login {
+    margin: 0;
+    color: var(--muted);
+}
+
 .recipe-card-footer {
     display: flex;
     align-items: center;

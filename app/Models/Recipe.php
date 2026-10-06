@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['title', 'description', 'ingredients', 'instructions', 'image', 'color', 'visibility'])]
@@ -46,6 +47,14 @@ class Recipe extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get ratings submitted for the recipe.
+     */
+    public function ratings(): HasMany
+    {
+        return $this->hasMany(RecipeRating::class);
     }
 
     public function getImageUrlAttribute(): ?string

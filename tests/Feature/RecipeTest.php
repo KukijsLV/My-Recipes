@@ -120,6 +120,86 @@ class RecipeTest extends TestCase
             ->assertSee('Anna');
     }
 
+    public function test_authenticated_user_can_rate_a_recipe_and_update_their_rating(): void
+    {
+        $user = User::factory()->create();
+        $recipe = Recipe::factory()->create(['visibility' => 'public']);
+
+        $this->actingAs($user)
+            ->post(route('recipes.rate', $recipe), ['rating' => 4])
+            ->assertRedirect(route('recipes.show', $recipe))
+            ->assertSessionHas('status', 'Paldies par vērtējumu!');
+
+        $this->assertDatabaseHas('recipe_ratings', [
+            'recipe_id' => $recipe->id,
+            'user_id' => $user->id,
+            'rating' => 4,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('recipes.rate', $recipe), ['rating' => 2])
+            ->assertRedirect(route('recipes.show', $recipe));
+
+        $this->assertDatabaseCount('recipe_ratings', 1);
+        $this->assertDatabaseHas('recipe_ratings', [
+            'recipe_id' => $recipe->id,
+            'user_id' => $user->id,
+            'rating' => 2,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('recipes.show', $recipe))
+            ->assertSee('value="2" checked', false);
+    }
+
+    public function test_recipe_rating_requires_authentication_and_recipe_access(): void
+    {
+        $publicRecipe = Recipe::factory()->create(['visibility' => 'public']);
+        $privateRecipe = Recipe::factory()->create(['visibility' => 'private']);
+
+        $this->post(route('recipes.rate', $publicRecipe), ['rating' => 5])
+            ->assertRedirect(route('login'));
+
+        $this->actingAs(User::factory()->create())
+            ->post(route('recipes.rate', $privateRecipe), ['rating' => 5])
+            ->assertForbidden();
+
+        $this->assertDatabaseCount('recipe_ratings', 0);
+    }
+
+    public function test_recipe_rating_must_be_an_integer_from_one_to_five(): void
+    {
+        $user = User::factory()->create();
+        $recipe = Recipe::factory()->create(['visibility' => 'public']);
+
+        $this->actingAs($user)
+            ->from(route('recipes.show', $recipe))
+            ->post(route('recipes.rate', $recipe), ['rating' => 6])
+            ->assertSessionHasErrors('rating');
+
+        $this->actingAs($user)
+            ->from(route('recipes.show', $recipe))
+            ->post(route('recipes.rate', $recipe), ['rating' => '3.5'])
+            ->assertSessionHasErrors('rating');
+
+        $this->assertDatabaseCount('recipe_ratings', 0);
+    }
+
+    public function test_recipe_ratings_are_displayed_as_an_average_on_the_recipe_and_index(): void
+    {
+        $recipe = Recipe::factory()->create(['visibility' => 'public']);
+        $recipe->ratings()->createMany([
+            ['user_id' => User::factory()->create()->id, 'rating' => 4],
+            ['user_id' => User::factory()->create()->id, 'rating' => 5],
+        ]);
+
+        $this->get(route('recipes.show', $recipe))
+            ->assertSee('4,5 / 5 (2 vērtējumi)');
+
+        $this->get(route('recipes.index'))
+            ->assertSee('4,5 / 5 (2 vērtējumi)');
+    }
+
     public function test_profile_page_lists_users_recipes(): void
     {
         $user = User::factory()->create(['name' => 'Līga']);

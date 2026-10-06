@@ -8,6 +8,7 @@
             <h1>{{ $recipe->title }}</h1>
             <p class="recipe-author-inline">Autors: <a href="{{ route('user.profile', $recipe->user) }}">{{ $recipe->user->name }}</a></p>
             <p class="recipe-description">{{ $recipe->description }}</p>
+            @include('recipes._rating-summary', ['recipe' => $recipe])
         </div>
         @can('update', $recipe)
             <div class="recipe-show-actions">
@@ -39,6 +40,23 @@
             <div>{{ $recipe->instructions }}</div>
         </section>
     </div>
+    @auth
+        <form class="recipe-rating-form" method="POST" action="{{ route('recipes.rate', $recipe) }}">
+            @csrf
+            <fieldset>
+                <legend>{{ $userRating ? 'Mainīt savu vērtējumu' : 'Novērtēt šo recepti' }}</legend>
+                <div class="recipe-rating-options">
+                    @for ($star = 5; $star >= 1; $star--)
+                        <input id="recipe-rating-{{ $star }}" name="rating" type="radio" value="{{ $star }}" @checked((int) old('rating', $userRating) === $star) required>
+                        <label for="recipe-rating-{{ $star }}" aria-label="{{ $star }} no 5 zvaigznēm">★</label>
+                    @endfor
+                </div>
+            </fieldset>
+            <button class="button secondary" type="submit">{{ $userRating ? 'Saglabāt vērtējumu' : 'Iesniegt vērtējumu' }}</button>
+        </form>
+    @else
+        <p class="recipe-rating-login"><a href="{{ route('login') }}">Ienāciet</a>, lai novērtētu šo recepti.</p>
+    @endauth
     @can('delete', $recipe)
         <form method="POST" action="{{ route('recipes.destroy', $recipe) }}" onsubmit="return confirm('Vai tiešām dzēst šo recepti?')">
             @csrf

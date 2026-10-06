@@ -24,6 +24,8 @@ class RecipeController extends Controller
 
         $recipes = Recipe::query()
             ->with('user')
+            ->withAvg('ratings', 'rating')
+            ->withCount('ratings')
             ->when($user, function ($query) use ($user) {
                 $query->where(function ($q) use ($user) {
                     $q->where('visibility', 'public')
@@ -85,11 +87,36 @@ class RecipeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Recipe $recipe): View
+    public function show(Request $request, Recipe $recipe): View
     {
         Gate::authorize('view', $recipe);
 
-        return view('recipes.show', compact('recipe'));
+        $recipe->loadAvg('ratings', 'rating');
+        $recipe->loadCount('ratings');
+        $userRating = $request->user()
+            ? $recipe->ratings()->where('user_id', $request->user()->id)->value('rating')
+            : null;
+
+        return view('recipes.show', compact('recipe', 'userRating'));
+    }
+
+    /**
+     * Store or update the authenticated user's rating for the recipe.
+     */
+    public function rate(Request $request, Recipe $recipe): RedirectResponse
+    {
+        Gate::authorize('view', $recipe);
+
+        $validated = $request->validate([
+            'rating' => ['required', 'integer', 'between:1,5'],
+        ]);
+
+        $recipe->ratings()->updateOrCreate(
+            ['user_id' => $request->user()->id],
+            ['rating' => $validated['rating']],
+        );
+
+        return to_route('recipes.show', $recipe)->with('status', 'Paldies par vērtējumu!');
     }
 
     /**
