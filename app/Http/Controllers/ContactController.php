@@ -25,7 +25,10 @@ class ContactController extends Controller
             'message' => ['required', 'string', 'max:5000'],
         ]);
 
-        $admins = User::query()->where('is_admin', true)->get(['email']);
+        $admins = User::query()
+            ->where('is_admin', true)
+            ->where('is_blocked', false)
+            ->get(['email']);
 
         if ($admins->isEmpty()) {
             return back()
@@ -34,7 +37,7 @@ class ContactController extends Controller
         }
 
         foreach ($admins as $admin) {
-            Mail::to($admin->email)->send(new ContactAdminMail(
+            Mail::to($admin->email)->queue(new ContactAdminMail(
                 contactName: $validated['name'],
                 contactEmail: $validated['email'],
                 contactSubject: $validated['subject'],

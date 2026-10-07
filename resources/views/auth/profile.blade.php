@@ -60,6 +60,11 @@
                 </div>
 
                 <div class="form-field">
+                    <label for="current_password">Pagaidājamo parole</label>
+                    <input id="current_password" name="current_password" type="password" autocomplete="current-password" required>
+                </div>
+
+                <div class="form-field">
                     <label for="password">Jauna parole</label>
                     <input id="password" name="password" type="password" autocomplete="new-password">
                 </div>
@@ -105,6 +110,7 @@
                 @endforeach
             </div>
         @endif
+        <div class="pagination-links">{{ $recipes->links() }}</div>
     </div>
 </div>
 @endsection

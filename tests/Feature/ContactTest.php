@@ -33,7 +33,7 @@ class ContactTest extends TestCase
         ])->assertRedirect(route('contact'))
             ->assertSessionHas('status');
 
-        Mail::assertSent(ContactAdminMail::class, function (ContactAdminMail $mail) use ($admin): bool {
+        Mail::assertQueued(ContactAdminMail::class, function (ContactAdminMail $mail) use ($admin): bool {
             $replyTo = $mail->envelope()->replyTo[0] ?? null;
 
             return $mail->hasTo($admin->email)

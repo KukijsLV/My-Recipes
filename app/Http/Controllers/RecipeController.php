@@ -35,10 +35,11 @@ class RecipeController extends Controller
                 $query->where('visibility', 'public');
             })
             ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('title', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%")
-                        ->orWhere('ingredients', 'like', "%{$search}%");
+                $escapedSearch = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search);
+                $query->where(function ($q) use ($escapedSearch) {
+                    $q->whereRaw('title LIKE ? ESCAPE CHAR(92)', ["%{$escapedSearch}%"])
+                        ->orWhereRaw('description LIKE ? ESCAPE CHAR(92)', ["%{$escapedSearch}%"])
+                        ->orWhereRaw('ingredients LIKE ? ESCAPE CHAR(92)', ["%{$escapedSearch}%"]);
                 });
             })
             ->when($sort === 'oldest', function ($query) {
@@ -46,7 +47,8 @@ class RecipeController extends Controller
             }, function ($query) {
                 $query->latest();
             })
-            ->get();
+            ->paginate(12)
+            ->withQueryString();
 
         return view('recipes.index', compact('recipes', 'search', 'sort'));
     }
@@ -66,20 +68,26 @@ class RecipeController extends Controller
     {
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'ingredients' => ['required', 'string'],
-            'instructions' => ['required', 'string'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'ingredients' => ['required', 'string', 'max:5000'],
+            'instructions' => ['required', 'string', 'max:10000'],
             'image' => ['nullable', 'image', 'max:5120'],
-            'image_url' => ['nullable', 'url', 'max:2048'],
+            'image_url' => ['nullable', 'url', 'max:255'],
             'visibility' => ['required', 'in:public,private'],
         ]);
 
-        $validated['image'] = $request->hasFile('image')
-            ? $request->file('image')->store('recipes', 'public')
-            : ($validated['image_url'] ?? null);
-        unset($validated['image_url']);
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('recipes', 'public');
+        } elseif ($validated['image_url'] ?? null) {
+            $imagePath = $validated['image_url'];
+        }
 
-        $request->user()->recipes()->create($validated);
+        $request->user()->recipes()->create([
+            ...$validated,
+            'image' => $imagePath,
+        ]);
+        unset($validated['image_url']);
 
         return to_route('recipes.index')->with('status', 'Recepte izveidota.');
     }
@@ -138,22 +146,31 @@ class RecipeController extends Controller
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'ingredients' => ['required', 'string'],
-            'instructions' => ['required', 'string'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'ingredients' => ['required', 'string', 'max:5000'],
+            'instructions' => ['required', 'string', 'max:10000'],
             'image' => ['nullable', 'image', 'max:5120'],
-            'image_url' => ['nullable', 'url', 'max:2048'],
+            'image_url' => ['nullable', 'url', 'max:255'],
             'visibility' => ['required', 'in:public,private'],
         ]);
 
+        $oldImage = $recipe->image;
+        $previousImageWasLocal = $this->isLocalRecipeImage($oldImage);
+        $newImage = $recipe->image;
+
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('recipes', 'public');
+            $newImage = $request->file('image')->store('recipes', 'public');
         } elseif ($request->filled('image_url')) {
-            $validated['image'] = $validated['image_url'];
-        } else {
-            unset($validated['image']);
+            $newImage = $validated['image_url'];
+        } elseif ($request->has('image_url')) {
+            $newImage = null;
         }
 
+        if ($newImage !== $oldImage && $previousImageWasLocal) {
+            Storage::disk('public')->delete($oldImage);
+        }
+
+        $validated['image'] = $newImage;
         unset($validated['image_url']);
         $recipe->update($validated);
 
@@ -166,8 +183,20 @@ class RecipeController extends Controller
     public function destroy(Recipe $recipe): RedirectResponse
     {
         Gate::authorize('delete', $recipe);
+
+        if ($this->isLocalRecipeImage($recipe->image)) {
+            Storage::disk('public')->delete($recipe->image);
+        }
+
         $recipe->delete();
 
         return to_route('recipes.index')->with('status', 'Recepte dzēsta.');
+    }
+
+    private function isLocalRecipeImage(?string $image): bool
+    {
+        return $image !== null
+            && ! filter_var($image, FILTER_VALIDATE_URL)
+            && ! str_starts_with($image, 'data:');
     }
 }

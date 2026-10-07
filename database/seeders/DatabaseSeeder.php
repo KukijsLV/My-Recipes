@@ -20,15 +20,5 @@ class DatabaseSeeder extends Seeder
             ['email' => 'test@example.com'],
             ['name' => 'Test User', 'password' => Hash::make('password')]
         );
-
-        User::query()->firstOrCreate(
-            ['email' => 'admin@myrecipes.test'],
-            [
-                'name' => 'Admin',
-                'password' => Hash::make('admin123'),
-                'is_admin' => true,
-                'is_blocked' => false,
-            ]
-        );
     }
 }

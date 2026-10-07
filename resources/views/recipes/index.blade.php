@@ -75,5 +75,6 @@
             </article>
         @endforeach
     </div>
+    <div class="pagination-links">{{ $recipes->links() }}</div>
 @endif
 @endsection

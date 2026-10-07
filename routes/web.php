@@ -12,14 +12,20 @@ Route::get('/', function () {
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'send'])->middleware('throttle:5,1')->name('contact.send');
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.store');
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('register.store');
+Route::middleware(['guest', 'throttle:5,1'])->group(function (): void {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.store');
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.store');
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->middleware('throttle:5,1')->name('password.email');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.update');
+});
 
-Route::get('/recipes', [RecipeController::class, 'index'])->name('recipes.index');
+Route::get('/recipes', [RecipeController::class, 'index'])->middleware('blocked-user')->name('recipes.index');
 
-Route::middleware('auth')->group(function (): void {
+Route::middleware(['auth', 'blocked-user'])->group(function (): void {
     Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
     Route::get('/users/{user}', [AuthController::class, 'showUserProfile'])->name('user.profile');
     Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
@@ -29,4 +35,4 @@ Route::middleware('auth')->group(function (): void {
     Route::resource('recipes', RecipeController::class)->except(['index', 'show']);
 });
 
-Route::get('/recipes/{recipe}', [RecipeController::class, 'show'])->name('recipes.show');
+Route::get('/recipes/{recipe}', [RecipeController::class, 'show'])->middleware('blocked-user')->name('recipes.show');

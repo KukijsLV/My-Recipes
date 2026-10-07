@@ -20,7 +20,15 @@ class RecipePolicy
      */
     public function view(?User $user, Recipe $recipe): bool
     {
-        return $recipe->visibility === 'public' || $user?->id === $recipe->user_id;
+        if ($recipe->visibility === 'public') {
+            return true;
+        }
+
+        if (! $user) {
+            return false;
+        }
+
+        return $user->is_admin || $user->id === $recipe->user_id;
     }
 
     /**

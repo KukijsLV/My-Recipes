@@ -6,6 +6,7 @@ use App\Models\Recipe;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -291,6 +292,7 @@ class RecipeTest extends TestCase
 
         $this->assertTrue($user->fresh()->is_blocked);
 
+        Auth::logout();
         $this->post(route('login.store'), [
             'email' => $user->email,
             'password' => 'password',
@@ -321,6 +323,7 @@ class RecipeTest extends TestCase
             ->put(route('profile.update'), [
                 'name' => 'Jauns vārds',
                 'email' => 'jauns@example.com',
+                'current_password' => 'password',
                 'password' => 'new-password-123',
                 'password_confirmation' => 'new-password-123',
                 'profile_image' => UploadedFile::fake()->image('profile.jpg'),
