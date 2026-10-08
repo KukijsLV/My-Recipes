@@ -92,7 +92,7 @@ class AuthSecurityTest extends TestCase
         $this->assertFalse($admin->is_blocked);
     }
 
-    public function test_login_and_registration_routes_are_rate_limited(): void
+    public function test_login_and_registration_routes_are_rate_limited_independently(): void
     {
         $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.10'])
             ->post(route('login.store'), [
@@ -101,7 +101,7 @@ class AuthSecurityTest extends TestCase
             ])
             ->assertSessionHasErrors(['email']);
 
-        for ($attempt = 0; $attempt < 5; $attempt++) {
+        for ($attempt = 0; $attempt < 4; $attempt++) {
             $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.10'])
                 ->post(route('login.store'), [
                     'email' => 'missing@example.com',
@@ -110,13 +110,6 @@ class AuthSecurityTest extends TestCase
         }
 
         $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.10'])
-            ->post(route('login.store'), [
-                'email' => 'missing@example.com',
-                'password' => 'wrong',
-            ])
-            ->assertStatus(429);
-
-        $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.11'])
             ->post(route('register.store'), [
                 'name' => 'New User',
                 'email' => 'new@example.com',
@@ -124,5 +117,24 @@ class AuthSecurityTest extends TestCase
                 'password_confirmation' => 'password',
             ])
             ->assertRedirect();
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.10'])
+                ->post(route('register.store'), [
+                    'name' => 'Another User',
+                    'email' => "attempt-{$attempt}@example.com",
+                    'password' => 'password',
+                    'password_confirmation' => 'password',
+                ]);
+        }
+
+        $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.10'])
+            ->post(route('register.store'), [
+                'name' => 'Blocked User',
+                'email' => 'blocked@example.com',
+                'password' => 'password',
+                'password_confirmation' => 'password',
+            ])
+            ->assertStatus(429);
     }
 }
